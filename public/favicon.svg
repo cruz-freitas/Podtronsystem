@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description><dc:creator>RealFaviconGenerator</dc:creator><dc:source>https://realfavicongenerator.net</dc:source></rdf:Description></rdf:RDF></metadata><defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"></stop>
+      <stop offset="100%" stop-color="#8b5cf6"></stop>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.18)"></stop>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"></stop>
+    </linearGradient>
+  </defs><rect width="512" height="512" rx="112" fill="url(#bg)"></rect><ellipse cx="256" cy="180" rx="200" ry="100" fill="url(#shine)" opacity="0.5"></ellipse><g stroke="white" stroke-width="22" stroke-linecap="round" fill="none" opacity="0.95">
+    <path d="M 80 200 Q 200 140 340 200 Q 400 230 340 270 Q 280 310 200 270"></path>
+    <path d="M 80 270 Q 170 210 280 270 Q 330 298 280 338 Q 230 378 180 338"></path>
+  </g><text x="256" y="430" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="180" font-weight="900" fill="white" opacity="0.15" letter-spacing="-4">P</text></svg>

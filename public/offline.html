@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sem conexão — Poditron</title>
+  <meta name="theme-color" content="#06060a">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #06060a;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.08;
+      pointer-events: none;
+    }
+    .blob1 { width: 400px; height: 400px; background: radial-gradient(circle, #6366f1, transparent); top: -10%; left: -10%; }
+    .blob2 { width: 300px; height: 300px; background: radial-gradient(circle, #8b5cf6, transparent); bottom: -5%; right: -5%; }
+    .card {
+      position: relative;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+    }
+    .icon-wrap {
+      width: 80px;
+      height: 80px;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 36px;
+    }
+    h1 { font-size: 24px; font-weight: 900; margin-bottom: 10px; }
+    p { color: rgba(255,255,255,0.45); font-size: 14px; line-height: 1.7; margin-bottom: 32px; }
+    .btn {
+      display: block;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 18px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 8px 30px rgba(99,102,241,0.4);
+      margin-bottom: 12px;
+      text-decoration: none;
+    }
+    .btn-sec {
+      display: block;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.5);
+      padding: 14px 32px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-decoration: none;
+    }
+    .powered {
+      margin-top: 40px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+
+  <div class="card">
+    <div class="icon-wrap">📡</div>
+    <h1>Sem conexão</h1>
+    <p>
+      Você está offline no momento.<br>
+      Verifique sua internet e tente novamente.<br>
+      Produtos visitados podem estar salvos no cache.
+    </p>
+    <button class="btn" onclick="window.location.reload()">↩ Tentar novamente</button>
+    <button class="btn-sec" onclick="history.back()">← Voltar</button>
+    <p class="powered">⚡ Powered by Poditron</p>
+  </div>
+</body>
+</html>
