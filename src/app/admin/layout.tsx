@@ -24,8 +24,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-zinc-950 overflow-hidden">
       <AdminSidebar />
-      {/* pt-14 on mobile for top bar, no padding on desktop */}
-      <main className="flex-1 overflow-y-auto bg-[#0d0d0d] pt-14 lg:pt-0">
+      {/* offset mobile = altura da topbar (56px) + notch iOS (safe-area-inset-top) */}
+      <main className="flex-1 overflow-y-auto bg-[#0d0d0d] pt-topbar lg:pt-0">
         {children}
       </main>
     </div>
