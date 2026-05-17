@@ -43,7 +43,7 @@ function formatBytes(b: number) {
 
 function KPI({ label, value, sub, icon: Icon, color, delta, loading }: any) {
   return (
-    <div className="relative rounded-2xl p-5 overflow-hidden" style={{ background: '#0c0c14', border: `1px solid ${color}20` }}>
+    <div className="relative rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ background: '#0c0c14', border: `1px solid ${color}20` }}>
       <div className="absolute inset-0 opacity-[0.06] blur-3xl pointer-events-none"
         style={{ background: `radial-gradient(circle at top right, ${color}, transparent)` }} />
       <div className="relative">
@@ -59,7 +59,7 @@ function KPI({ label, value, sub, icon: Icon, color, delta, loading }: any) {
         </div>
         {loading
           ? <div className="h-8 w-24 rounded-lg animate-pulse mb-1" style={{ background: `${color}15` }} />
-          : <div className="text-3xl font-black text-white mb-1">{value}</div>
+          : <div className="text-2xl sm:text-3xl font-black text-white mb-1">{value}</div>
         }
         <div className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</div>
         {sub && <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>{sub}</div>}
@@ -169,10 +169,10 @@ export default function SuperAdminDashboard() {
     <div className="min-h-full" style={{ background: '#07070f' }}>
       <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, #7c3aed, #a855f7, #ec4899, #10b981)' }} />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-8">
+      <div className="p-3 sm:p-6 max-w-7xl mx-auto space-y-6 sm:space-y-8">
 
         {/* HEADER */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
@@ -183,7 +183,7 @@ export default function SuperAdminDashboard() {
                 {lastUpdate.toLocaleTimeString('pt-BR')}
               </span>
             </div>
-            <h1 className="text-3xl font-black text-white">Painel de Vendas</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Painel de Vendas</h1>
             <p className="text-zinc-500 text-sm mt-1">Monitoramento da plataforma Poditron</p>
           </div>
           <div className="flex gap-2">
@@ -195,7 +195,7 @@ export default function SuperAdminDashboard() {
             <a href="/super-admin/companies/new"
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', boxShadow: '0 4px 20px rgba(124,58,237,0.3)' }}>
-              <Plus className="w-4 h-4" /> Registrar Venda
+              <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Registrar </span>Venda
             </a>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function SuperAdminDashboard() {
         </div>
 
         {/* CHARTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
           {/* Revenue chart */}
           <div className="lg:col-span-2 rounded-2xl p-5" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -293,7 +293,7 @@ export default function SuperAdminDashboard() {
         </div>
 
         {/* MONITORING */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 
           {/* System health */}
           <div className="rounded-2xl p-5 space-y-3" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -389,7 +389,82 @@ export default function SuperAdminDashboard() {
             <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Clientes</h2>
             <a href="/super-admin/companies" className="text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors">Ver todos →</a>
           </div>
-          <div className="rounded-2xl overflow-hidden" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
+
+          {/* Mobile card list (hidden on md+) */}
+          <div className="md:hidden space-y-2">
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="rounded-xl p-3 animate-pulse" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-xl flex-shrink-0" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 rounded w-32" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                      <div className="h-3 rounded w-20" style={{ background: 'rgba(255,255,255,0.04)' }} />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : companies.length === 0 ? (
+              <div className="rounded-2xl p-10 text-center" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <Building2 className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
+                <p className="text-zinc-500 text-sm mb-4">Nenhuma venda registrada ainda</p>
+                <a href="/super-admin/companies/new"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+                  <Plus className="w-4 h-4" /> Registrar primeira venda
+                </a>
+              </div>
+            ) : companies.map(co => (
+              <div key={co.id} className="rounded-xl p-3" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center"
+                    style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                    {co.logo_url ? <img src={co.logo_url} alt={co.name} className="w-full h-full object-cover" /> : <Building2 className="w-4 h-4 text-purple-400" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-white truncate">{co.name}</div>
+                    <div className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>/{co.slug}</div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${co.is_active ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/15' : 'text-red-400 bg-red-500/10 border border-red-500/15'}`}>
+                    <span className={`w-1 h-1 rounded-full ${co.is_active ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+                    {co.is_active ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                  <span className="text-base font-black text-emerald-400">
+                    {co.sale_value ? formatCurrency(Number(co.sale_value)) : <span className="text-zinc-600 text-sm font-normal">—</span>}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <a href={`/catalog/${co.slug}`} target="_blank"
+                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
+                      style={{ background: 'rgba(99,102,241,0.1)', color: '#6366f1' }}>
+                      <Globe className="w-3 h-3" /> Ver
+                    </a>
+                    <button onClick={() => toggleActive(co)}
+                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
+                      style={{ background: co.is_active ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', color: co.is_active ? '#ef4444' : '#10b981' }}>
+                      {co.is_active ? <XCircle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
+                      {co.is_active ? 'Desativar' : 'Ativar'}
+                    </button>
+                    <a href={`/super-admin/companies/${co.id}`}
+                      className="p-1.5 rounded-lg"
+                      style={{ background: 'rgba(168,85,247,0.1)' }}>
+                      <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {companies.length > 0 && (
+              <div className="flex items-center justify-between px-1 pt-1">
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{companies.length} cliente{companies.length !== 1 ? 's' : ''}</span>
+                <span className="text-sm font-black text-emerald-400">Total: {formatCurrency(stats.revenue_total)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table (hidden on mobile) */}
+          <div className="hidden md:block rounded-2xl overflow-hidden" style={{ background: '#0c0c14', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -501,8 +576,8 @@ export default function SuperAdminDashboard() {
                 <span className="text-sm font-black text-emerald-400">Total: {formatCurrency(stats.revenue_total)}</span>
               </div>
             )}
-          </div>
-        </div>
+          </div>{/* end desktop table */}
+        </div>{/* end CLIENTS TABLE */}
 
       </div>
     </div>
