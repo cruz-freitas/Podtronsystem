@@ -8,12 +8,268 @@ import type { Company, Theme, Category, Product, Promotion, ProductVariation } f
 import {
   Search, MessageCircle, Star, Zap, Package, X, Wind,
   ShieldAlert, AlertTriangle, Tag, Percent, Check,
-  ShoppingCart, Plus
+  ShoppingCart, Plus, ArrowLeft, User, Bike, ShoppingBag, Send
 } from 'lucide-react'
-import { formatCurrency, buildWhatsAppUrl, buildProductWhatsAppMessage, calculateDiscount } from '@/lib/utils'
+import { formatCurrency, buildWhatsAppUrl, calculateDiscount } from '@/lib/utils'
 import { CartProvider, useCart } from '@/components/catalog/CartContext'
 import { CartDrawer } from '@/components/catalog/CartDrawer'
 import { PWAPrompts } from '@/components/catalog/PWAPrompts'
+
+// ─── Quick Order Modal (item único → WhatsApp) ────────────────
+function QuickOrderModal({
+  product, variation, finalPrice, company, catalogUrl, activePromo,
+  primary, secondary, bg, onClose,
+}: {
+  product: Product
+  variation: import('@/types').ProductVariation | null
+  finalPrice: number
+  company: Company
+  catalogUrl: string
+  activePromo: Promotion | null
+  primary: string
+  secondary: string
+  bg: string
+  onClose: () => void
+}) {
+  const [step, setStep] = useState<'form' | 'review'>('form')
+  const [name, setName] = useState('')
+  const [delivery, setDelivery] = useState<boolean | null>(null)
+  const [address, setAddress] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const productUrl = `${catalogUrl}/product/${product.slug}`
+  const variationLabel = variation?.flavor || variation?.name || undefined
+
+  function validate() {
+    const e: Record<string, string> = {}
+    if (!name.trim()) e.name = 'Informe seu nome'
+    if (delivery === null) e.delivery = 'Escolha uma opção'
+    if (delivery && !address.trim()) e.address = 'Informe o endereço de entrega'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  function buildMessage() {
+    const lines: string[] = []
+    lines.push(company.whatsapp_message || `Olá, ${company.name}!`)
+    lines.push('')
+    lines.push(`👤 *${name.trim()}*`)
+    if (delivery) {
+      lines.push(`📦 *Entrega* em: ${address.trim()}`)
+    } else {
+      lines.push(`🏪 *Retirada* no local`)
+    }
+    lines.push('')
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    lines.push('🛍️ *PEDIDO*')
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    lines.push('')
+    lines.push(`*${product.name}*`)
+    if (product.brand) lines.push(`Marca: ${product.brand}`)
+    if (variationLabel) lines.push(`Sabor/Variação: *${variationLabel}*`)
+    lines.push(`Qtd: *1x*  |  Valor: *${formatCurrency(finalPrice)}*`)
+    if (product.sku) lines.push(`Código: ${product.sku}`)
+    lines.push(`🔗 ${productUrl}`)
+    lines.push('')
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    if (activePromo) lines.push(`🎉 Promoção: *${activePromo.name}*`)
+    lines.push(`💰 *TOTAL: ${formatCurrency(finalPrice)}*`)
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    lines.push('')
+    lines.push('Aguardo confirmação! 😊')
+    return lines.join('\n')
+  }
+
+  function handleSend() {
+    const url = buildWhatsAppUrl(company.whatsapp || '', buildMessage())
+    window.open(url, '_blank')
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+        style={{ background: bg, border: '1px solid rgba(255,255,255,0.08)', maxHeight: '92dvh' }}>
+
+        {/* Color bar */}
+        <div className="h-1 flex-shrink-0" style={{ background: `linear-gradient(90deg, ${primary}, ${secondary})` }} />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0"
+          style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-3">
+            {step === 'review' && (
+              <button onClick={() => setStep('form')} className="p-1.5 rounded-lg transition-colors hover:bg-white/10">
+                <ArrowLeft className="w-4 h-4 text-white" />
+              </button>
+            )}
+            <div>
+              <h2 className="text-base font-black text-white">Pedir via WhatsApp</h2>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {step === 'form' ? 'Seus dados para o pedido' : 'Revise e envie'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl transition-colors hover:bg-white/10">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Product summary strip */}
+        <div className="px-5 py-3 flex items-center gap-3 flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          {(variation?.image_url || product.thumbnail_url || product.images?.[0]) ? (
+            <img
+              src={variation?.image_url || product.thumbnail_url || product.images?.[0]}
+              alt={product.name}
+              className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <Package className="w-5 h-5" style={{ color: 'rgba(255,255,255,0.2)' }} />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white truncate">{product.name}</p>
+            {variationLabel && <p className="text-xs truncate" style={{ color: primary }}>{variationLabel}</p>}
+          </div>
+          <div className="flex-shrink-0 text-right">
+            <p className="text-base font-black" style={{ color: activePromo ? (activePromo.highlight_color || '#ef4444') : 'white' }}>
+              {formatCurrency(finalPrice)}
+            </p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>1 unid.</p>
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5">
+
+          {step === 'form' ? (
+            <>
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  <User className="w-3.5 h-3.5 inline mr-1.5" style={{ color: primary }} />
+                  Seu nome *
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })) }}
+                  placeholder="Como prefere ser chamado?"
+                  className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.06)',
+                    border: errors.name ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                    fontSize: 16,
+                  }}
+                />
+                {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+              </div>
+
+              {/* Delivery or pickup */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Como vai receber? *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: false, label: 'Retirar', sub: 'Busco no local', icon: ShoppingBag },
+                    { value: true, label: 'Entrega', sub: 'Quero receber', icon: Bike },
+                  ].map(opt => (
+                    <button key={String(opt.value)}
+                      onClick={() => { setDelivery(opt.value); setErrors(p => ({ ...p, delivery: '', address: '' })) }}
+                      className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl transition-all"
+                      style={delivery === opt.value
+                        ? { background: `${primary}20`, border: `2px solid ${primary}`, boxShadow: `0 0 20px ${primary}30` }
+                        : { background: 'rgba(255,255,255,0.04)', border: '2px solid rgba(255,255,255,0.08)' }
+                      }>
+                      <opt.icon className="w-6 h-6" style={{ color: delivery === opt.value ? primary : 'rgba(255,255,255,0.4)' }} />
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-white">{opt.label}</div>
+                        <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{opt.sub}</div>
+                      </div>
+                      {delivery === opt.value && (
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: primary }}>
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {errors.delivery && <p className="text-red-400 text-xs mt-2">{errors.delivery}</p>}
+              </div>
+
+              {/* Address — only if delivery */}
+              {delivery === true && (
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">
+                    Endereço de entrega *
+                  </label>
+                  <textarea
+                    value={address}
+                    onChange={e => { setAddress(e.target.value); setErrors(p => ({ ...p, address: '' })) }}
+                    placeholder="Rua, número, bairro, complemento..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-zinc-600 outline-none resize-none"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: errors.address ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.1)',
+                      fontSize: 16,
+                    }}
+                  />
+                  {errors.address && <p className="text-red-400 text-xs mt-1">{errors.address}</p>}
+                </div>
+              )}
+
+              {/* Next button */}
+              <button
+                onClick={() => { if (validate()) setStep('review') }}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95"
+                style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 30px ${primary}40` }}>
+                Revisar pedido
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Review step */}
+              <div className="space-y-3">
+                <div className="rounded-2xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Seus dados</p>
+                  <p className="text-white font-semibold">{name}</p>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {delivery ? `📦 Entrega em: ${address}` : '🏪 Retirada no local'}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Produto</p>
+                  <p className="text-white font-semibold">{product.name}</p>
+                  {variationLabel && <p className="text-sm" style={{ color: primary }}>{variationLabel}</p>}
+                  <p className="text-base font-black" style={{ color: activePromo ? (activePromo.highlight_color || '#ef4444') : 'white' }}>
+                    {formatCurrency(finalPrice)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Send button */}
+              <button
+                onClick={handleSend}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-black text-white transition-all hover:scale-[1.02] active:scale-95"
+                style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', boxShadow: '0 8px 30px rgba(37,211,102,0.4)' }}>
+                <Send className="w-4 h-4" /> Enviar pelo WhatsApp
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ─── Apply promo ──────────────────────────────────────────────
 function applyPromo(price: number, promo: Promotion | null) {
@@ -182,15 +438,16 @@ function SectionTitle({ icon, label, count, primary }: { icon: string; label: st
 }
 
 // ─── Product card ─────────────────────────────────────────────
-function ProductCard({ product, company, primary, secondary, surface, bg, index, activePromo }: {
+function ProductCard({ product, company, primary, secondary, surface, bg, index, activePromo, catalogUrl }: {
   product: Product; company: Company; primary: string; secondary: string
-  surface: string; bg: string; index: number; activePromo: Promotion | null
+  surface: string; bg: string; index: number; activePromo: Promotion | null; catalogUrl: string
 }) {
   const { addItem, items } = useCart()
   const vars = product.variations?.filter(v => v.is_active) || []
-  const [selected, setSelected] = useState<ProductVariation | null>(vars[0] || null)
+  const [selected, setSelected] = useState<import('@/types').ProductVariation | null>(vars[0] || null)
   const [hovered, setHovered] = useState(false)
   const [justAdded, setJustAdded] = useState(false)
+  const [showQuickOrder, setShowQuickOrder] = useState(false)
 
   const img = selected?.image_url || product.thumbnail_url || product.images?.[0]
   const basePrice = selected?.price || product.price
@@ -215,15 +472,23 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
     ? `${window.location.origin}/catalog/${company.slug}/product/${product.slug}`
     : `/catalog/${company.slug}/product/${product.slug}`
 
-  const msg = buildProductWhatsAppMessage({
-    productName: product.name, brand: product.brand || undefined,
-    sku: product.sku || undefined,
-    variation: selected?.flavor || selected?.name || undefined,
-    price: finalPrice, catalogUrl: productUrl,
-    greeting: company.whatsapp_message || undefined,
-  })
-
   return (
+    <>
+      {/* Quick Order Modal */}
+      {showQuickOrder && company.whatsapp && (
+        <QuickOrderModal
+          product={product}
+          variation={selected}
+          finalPrice={finalPrice}
+          company={company}
+          catalogUrl={catalogUrl}
+          activePromo={activePromo}
+          primary={primary}
+          secondary={secondary}
+          bg={bg}
+          onClose={() => setShowQuickOrder(false)}
+        />
+      )}
     <div className="relative rounded-2xl overflow-hidden cursor-pointer group flex flex-col"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -339,12 +604,13 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
               <span className="truncate">{justAdded ? 'Ok!' : 'Adicionar'}</span>
             </button>
             {company.whatsapp && (
-              <a href={buildWhatsAppUrl(company.whatsapp, msg)} target="_blank" rel="noopener noreferrer"
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setShowQuickOrder(true) }}
                 className="flex-shrink-0 flex items-center justify-center p-2 rounded-xl transition-all active:scale-95"
                 style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.25)' }}
-                title="Chamar direto no WhatsApp">
+                title="Pedir via WhatsApp">
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-              </a>
+              </button>
             )}
           </div>
         ) : (
@@ -355,6 +621,7 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
         )}
       </div>
     </div>
+    </>
   )
 }
 
@@ -585,7 +852,7 @@ function CatalogContent() {
             <section>
               <SectionTitle icon="🔥" label="Destaques" primary={primary} />
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-4">
-                {featured.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} />)}
+                {featured.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} catalogUrl={catalogUrl} />)}
               </div>
             </section>
           )}
@@ -593,7 +860,7 @@ function CatalogContent() {
             <section>
               <SectionTitle icon="💨" label={activeCategory ? categories.find(c => c.id === activeCategory)?.name || 'Produtos' : 'Todos os Produtos'} count={regular.length} primary={primary} />
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-4">
-                {regular.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} />)}
+                {regular.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} catalogUrl={catalogUrl} />)}
               </div>
             </section>
           )}
