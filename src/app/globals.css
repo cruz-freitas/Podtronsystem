@@ -150,3 +150,35 @@ html {
 .glow-success {
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
+
+/* ── PWA / iOS safe-area ───────────────────────────────────────
+   Garante que nenhum elemento fica atrás do notch ou da home bar
+   quando o app roda em modo standalone (PWA) no iPhone.
+   viewportFit=cover + black-translucent faz a tela ocupar a área
+   total, mas o conteúdo precisa empurrar manualmente.
+──────────────────────────────────────────────────────────────── */
+
+/* Padding utilitário reutilizável */
+.pt-safe  { padding-top:    env(safe-area-inset-top, 0px); }
+.pb-safe  { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pl-safe  { padding-left:   env(safe-area-inset-left, 0px); }
+.pr-safe  { padding-right:  env(safe-area-inset-right, 0px); }
+
+/* Header fixo/sticky que precisa começar abaixo do notch */
+.header-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Altura total do header = altura visual + notch */
+.h-topbar {
+  /* 56px é a altura visual da barra; soma o notch por cima */
+  height: calc(56px + env(safe-area-inset-top, 0px));
+}
+
+/* Offset do main quando há topbar fixa */
+.mt-topbar {
+  margin-top: calc(56px + env(safe-area-inset-top, 0px));
+}
+.pt-topbar {
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+}
