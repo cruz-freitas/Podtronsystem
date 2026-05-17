@@ -43,14 +43,14 @@ function AgeGate({ primary, secondary, bg, onConfirm, onDeny }: {
   )
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto flex items-end sm:items-center justify-center p-3"
-      style={{ background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(20px)' }}>
+    <div className="fixed inset-0 z-[9999] overflow-y-auto flex items-end sm:items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(20px)', padding: 'max(12px, env(safe-area-inset-bottom)) 12px 12px' }}>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full opacity-10 blur-[80px]"
           style={{ background: `radial-gradient(circle, ${primary}, transparent)` }} />
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md pb-safe">
         <div className="rounded-3xl overflow-hidden" style={{ background: '#0e0e16', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="h-1" style={{ background: `linear-gradient(90deg, ${primary}, ${secondary})` }} />
           <div className="p-5 sm:p-8 text-center space-y-4 sm:space-y-6">
@@ -147,8 +147,13 @@ function CartFAB({ primary, secondary }: { primary: string; secondary: string })
   if (totalItems === 0) return null
   return (
     <button onClick={openCart}
-      className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl font-bold text-white text-sm transition-all hover:scale-105 active:scale-95"
-      style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, boxShadow: `0 8px 30px ${primary}50` }}>
+      className="fixed z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl font-bold text-white text-sm transition-all hover:scale-105 active:scale-95"
+      style={{
+        bottom: 'max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
+        left: '1rem',
+        background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+        boxShadow: `0 8px 30px ${primary}50`
+      }}>
       <div className="relative">
         <ShoppingCart className="w-5 h-5" />
         <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-white flex items-center justify-center text-[9px] font-black"
@@ -219,7 +224,7 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
   })
 
   return (
-    <div className="relative rounded-2xl overflow-hidden cursor-pointer group"
+    <div className="relative rounded-2xl overflow-hidden cursor-pointer group flex flex-col"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -241,40 +246,44 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
       )}
 
       <a href={`/catalog/${company.slug}/product/${product.slug}`}>
-        <div className="relative overflow-hidden" style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.02)' }}>
+        {/* Image — fixed aspect ratio, never clipped */}
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '1/1', background: 'rgba(255,255,255,0.02)' }}>
           {img ? (
             <img src={img} alt={product.name} className="w-full h-full object-cover"
-              style={{ transform: hovered ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1)' }} />
+              style={{ transform: hovered ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1)' }} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="w-10 h-10" style={{ color: 'rgba(255,255,255,0.07)' }} />
             </div>
           )}
           <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${bg}cc 0%, transparent 50%)`, opacity: hovered ? 0.7 : 0.35, transition: 'opacity 0.3s' }} />
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1">
+
+          {/* Badges — stacked vertically, never overflow */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1 max-w-[calc(100%-1rem)]">
             {discount > 0 && (
-              <span className="text-[10px] font-black text-white px-1.5 py-0.5 rounded-lg"
+              <span className="text-[10px] font-black text-white px-1.5 py-0.5 rounded-lg self-start"
                 style={{ background: activePromo ? (activePromo.highlight_color || '#ef4444') : '#ef4444', boxShadow: '0 2px 8px rgba(239,68,68,0.4)' }}>
                 -{discount}%
               </span>
             )}
             {product.is_featured && (
-              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-lg flex items-center gap-1"
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-lg flex items-center gap-1 self-start"
                 style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})`, color: '#fff' }}>
                 <Star className="w-2.5 h-2.5 fill-white" /> TOP
               </span>
             )}
             {outOfStock && (
-              <span className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded-lg" style={{ background: 'rgba(0,0,0,0.8)' }}>ESGOTADO</span>
+              <span className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded-lg self-start" style={{ background: 'rgba(0,0,0,0.8)' }}>ESGOTADO</span>
             )}
           </div>
         </div>
       </a>
 
-      <div className="p-2.5 sm:p-3 space-y-2">
-        {product.brand && <p className="text-[10px] font-black uppercase tracking-[0.15em]" style={{ color: primary }}>{product.brand}</p>}
+      {/* Card body — flex-col + flex-1 so it fills remaining space */}
+      <div className="p-2.5 sm:p-3 flex flex-col gap-1.5 flex-1">
+        {product.brand && <p className="text-[10px] font-black uppercase tracking-[0.15em] truncate" style={{ color: primary }}>{product.brand}</p>}
 
-        <a href={`/catalog/${company.slug}/product/${product.slug}`}>
+        <a href={`/catalog/${company.slug}/product/${product.slug}`} className="flex-1">
           <h3 className="text-xs sm:text-sm font-bold text-white leading-snug line-clamp-2">{product.name}</h3>
         </a>
 
@@ -298,42 +307,40 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
           </div>
         )}
 
-        {/* Price */}
-        <div className="space-y-0.5">
+        {/* Price block — always visible, never clipped */}
+        <div className="mt-auto pt-1">
           {activePromo && !outOfStock && (
-            <div className="flex items-center gap-1">
-              <Tag className="w-2.5 h-2.5" style={{ color: activePromo.highlight_color || '#ef4444' }} />
-              <span className="text-[9px] font-bold uppercase" style={{ color: activePromo.highlight_color || '#ef4444' }}>{activePromo.name}</span>
+            <div className="flex items-center gap-1 mb-0.5">
+              <Tag className="w-2.5 h-2.5 flex-shrink-0" style={{ color: activePromo.highlight_color || '#ef4444' }} />
+              <span className="text-[9px] font-bold uppercase truncate" style={{ color: activePromo.highlight_color || '#ef4444' }}>{activePromo.name}</span>
             </div>
           )}
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-sm sm:text-base font-black" style={{ color: activePromo ? (activePromo.highlight_color || '#ef4444') : 'white' }}>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm sm:text-base font-black leading-none" style={{ color: activePromo ? (activePromo.highlight_color || '#ef4444') : 'white' }}>
               {formatCurrency(finalPrice)}
             </span>
             {displayOriginal && displayOriginal > finalPrice && (
-              <span className="text-[10px] line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>{formatCurrency(displayOriginal)}</span>
+              <span className="text-[10px] line-through leading-none" style={{ color: 'rgba(255,255,255,0.3)' }}>{formatCurrency(displayOriginal)}</span>
             )}
           </div>
         </div>
 
         {/* Action buttons */}
         {!outOfStock ? (
-          <div className="flex gap-1.5">
-            {/* Add to cart */}
+          <div className="flex gap-1.5 mt-1">
             <button onClick={handleAddToCart}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] sm:text-xs font-black text-white transition-all active:scale-95"
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] sm:text-xs font-black text-white transition-all active:scale-95 min-w-0"
               style={{
                 background: justAdded ? 'linear-gradient(135deg, #10b981, #059669)' : `linear-gradient(135deg, ${primary}, ${secondary})`,
                 boxShadow: justAdded ? '0 4px 15px rgba(16,185,129,0.4)' : `0 4px 15px ${primary}30`,
                 transition: 'all 0.3s',
               }}>
-              {justAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-              {justAdded ? 'Adicionado!' : 'Adicionar'}
+              {justAdded ? <Check className="w-3 h-3 flex-shrink-0" /> : <Plus className="w-3 h-3 flex-shrink-0" />}
+              <span className="truncate">{justAdded ? 'Ok!' : 'Adicionar'}</span>
             </button>
-            {/* Direct WhatsApp */}
             {company.whatsapp && (
               <a href={buildWhatsAppUrl(company.whatsapp, msg)} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center p-2 rounded-xl transition-all active:scale-95"
+                className="flex-shrink-0 flex items-center justify-center p-2 rounded-xl transition-all active:scale-95"
                 style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.25)' }}
                 title="Chamar direto no WhatsApp">
                 <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
@@ -341,7 +348,7 @@ function ProductCard({ product, company, primary, secondary, surface, bg, index,
             )}
           </div>
         ) : (
-          <div className="w-full py-2 rounded-xl text-xs font-bold text-center"
+          <div className="w-full py-2 rounded-xl text-xs font-bold text-center mt-1"
             style={{ background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
             ESGOTADO
           </div>
@@ -485,7 +492,7 @@ function CatalogContent() {
 
             <div className="flex items-center gap-2">
               <button onClick={() => setSearchOpen(!searchOpen)} className="sm:hidden p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <Search className="w-4 h-4 text-white" />
+                {searchOpen ? <X className="w-4 h-4 text-white" /> : <Search className="w-4 h-4 text-white" />}
               </button>
 
               {/* Cart button in header */}
@@ -572,11 +579,12 @@ function CatalogContent() {
         )}
 
         {/* PRODUCTS */}
-        <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-10 space-y-8 sm:space-y-14">
+        <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-10 space-y-8 sm:space-y-14"
+          style={{ paddingBottom: 'max(6rem, calc(env(safe-area-inset-bottom) + 5rem))' }}>
           {featured.length > 0 && (
             <section>
               <SectionTitle icon="🔥" label="Destaques" primary={primary} />
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-4">
                 {featured.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} />)}
               </div>
             </section>
@@ -584,7 +592,7 @@ function CatalogContent() {
           {regular.length > 0 && (
             <section>
               <SectionTitle icon="💨" label={activeCategory ? categories.find(c => c.id === activeCategory)?.name || 'Produtos' : 'Todos os Produtos'} count={regular.length} primary={primary} />
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 mt-4">
                 {regular.map((p, i) => <ProductCard key={p.id} product={p} company={company} primary={primary} secondary={secondary} surface={surface} bg={bg} index={i} activePromo={activePromo} />)}
               </div>
             </section>
@@ -608,15 +616,20 @@ function CatalogContent() {
         </footer>
       </div>
 
-      {/* Cart FAB - bottom left */}
+      {/* Cart FAB - bottom left, respects safe area */}
       <CartFAB primary={primary} secondary={secondary} />
 
-      {/* Floating WhatsApp - bottom right */}
+      {/* Floating WhatsApp - bottom right, respects safe area */}
       {company.whatsapp && (
         <a href={buildWhatsAppUrl(company.whatsapp, company.whatsapp_message || 'Olá! Vim pelo catálogo online.')}
           target="_blank" rel="noopener noreferrer"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 group"
-          style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', boxShadow: '0 8px 30px rgba(37,211,102,0.4)' }}>
+          className="fixed z-50 flex items-center gap-2 px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 group"
+          style={{
+            bottom: 'max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
+            right: '1rem',
+            background: 'linear-gradient(135deg, #25D366, #128C7E)',
+            boxShadow: '0 8px 30px rgba(37,211,102,0.4)'
+          }}>
           <MessageCircle className="w-5 h-5 fill-white" />
           <span className="hidden sm:inline">Fale conosco</span>
           <span className="absolute inset-0 rounded-xl sm:rounded-2xl animate-ping opacity-20" style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', animationDuration: '2s' }} />
@@ -633,7 +646,7 @@ function CatalogContent() {
         bg={bg}
       />
 
-      {/* PWA: banner de instalação, offline pill, update banner */}
+      {/* PWA prompts */}
       <PWAPrompts
         primary={primary}
         secondary={secondary}
@@ -648,10 +661,10 @@ function CatalogContent() {
         @keyframes blobFloat2 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(-4%,-3%) scale(1.08); } 66% { transform: translate(2%,-2%) scale(0.95); } }
         @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shimmerBanner { 0% { transform: translateX(-100%) skewX(-12deg); } 100% { transform: translateX(300%) skewX(-12deg); } }
-        /* PWA: evita bounce/overscroll no iOS */
+        /* iOS PWA: evita bounce/overscroll */
         html, body { overscroll-behavior: none; }
-        /* Garante que o conteúdo respeite o safe-area do iPhone */
-        .catalog-footer { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+        /* Safe area padding para conteúdo inferior */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
       `}</style>
     </div>
   )
