@@ -88,7 +88,7 @@ function QuickOrderModal({
 
   return (
     <div className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
         style={{ background: bg, border: '1px solid rgba(255,255,255,0.08)', maxHeight: '92dvh' }}>
@@ -300,7 +300,7 @@ function AgeGate({ primary, secondary, bg, onConfirm, onDeny }: {
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(20px)', padding: 'max(12px, env(safe-area-inset-bottom)) 12px 12px' }}>
+      style={{ background: 'rgba(0,0,0,0.97)', backdropFilter: 'blur(20px)', paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))', paddingLeft: '12px', paddingRight: '12px' }}>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full opacity-10 blur-[80px]"
           style={{ background: `radial-gradient(circle, ${primary}, transparent)` }} />
@@ -730,8 +730,13 @@ function CatalogContent() {
       <div className="relative z-10">
         {promotions.length > 0 && <PromoBanner promotions={promotions} />}
 
-        {/* HEADER */}
-        <header className="sticky top-0 z-50" style={{ background: `${bg}e0`, backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        {/* HEADER — .header-safe adiciona padding-top = safe-area-inset-top para não sobrepor notch no PWA iOS */}
+        <header className="sticky top-0 z-50 header-safe"
+          style={{
+            background: `${bg}e0`,
+            backdropFilter: 'blur(24px)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+          }}>
           <div className="h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${primary}, ${secondary}, transparent)` }} />
           <div className="max-w-6xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-3">
             <a href={`/catalog/${company.slug}`} className="flex items-center gap-2.5 flex-shrink-0 group">
@@ -824,7 +829,13 @@ function CatalogContent() {
 
         {/* CATEGORIES */}
         {categories.length > 0 && (
-          <div className="sticky top-14 z-40" style={{ background: `${bg}cc`, backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          <div className="sticky z-40"
+            style={{
+              top: 'calc(env(safe-area-inset-top, 0px) + 58px)',
+              background: `${bg}cc`,
+              backdropFilter: 'blur(20px)',
+              borderBottom: '1px solid rgba(255,255,255,0.04)',
+            }}>
             <div className="max-w-6xl mx-auto px-3 sm:px-4">
               <div className="flex gap-2 overflow-x-auto py-2.5 no-scrollbar">
                 {[{ id: '', name: 'Todos' }, ...categories].map(cat => {
