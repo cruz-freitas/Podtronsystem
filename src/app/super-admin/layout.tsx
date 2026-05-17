@@ -104,21 +104,23 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         <SidebarContent />
       </aside>
 
-      {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 h-14 bg-zinc-950 border-b border-zinc-800/50">
-        <Link href="/super-admin/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <div className="text-white font-bold text-sm leading-none">Poditron</div>
-            <div className="text-purple-400 text-[10px]">Super Admin</div>
-          </div>
-        </Link>
-        <button onClick={() => setOpen(true)}
-          className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 active:bg-zinc-800 transition-colors">
-          <Menu className="w-5 h-5" />
-        </button>
+      {/* Mobile top bar — header-safe adiciona padding-top = safe-area-inset-top (notch iOS no PWA) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col bg-zinc-950 border-b border-zinc-800/50 header-safe">
+        <div className="flex items-center justify-between px-4 h-14">
+          <Link href="/super-admin/dashboard" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <div className="text-white font-bold text-sm leading-none">Poditron</div>
+              <div className="text-purple-400 text-[10px]">Super Admin</div>
+            </div>
+          </Link>
+          <button onClick={() => setOpen(true)}
+            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 active:bg-zinc-800 transition-colors">
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer overlay */}
@@ -131,8 +133,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         </div>
       )}
 
-      {/* Main — padding top on mobile for top bar */}
-      <main className="flex-1 overflow-y-auto bg-[#0d0d0d] pt-14 lg:pt-0">
+      {/* Main — offset = topbar (56px) + notch iOS (safe-area-inset-top) */}
+      <main className="flex-1 overflow-y-auto bg-[#0d0d0d] pt-topbar lg:pt-0">
         {children}
       </main>
 
